@@ -3,17 +3,20 @@ import {UsersRound,CalendarCheck2,BriefcaseBusiness,TrendingUp,UserCog,Target,Ca
 import {api} from '../api';
 import {getDateRange,rangeOptions} from '../dateRanges';
 import InterviewCalendar from './InterviewCalendar';
+import {useAuth} from '../App';
+import {dashboardGreeting} from '../greeting';
 
 const colors=['#7658e8','#38afd2','#f0a83d','#39b978','#ec6b83','#9b79ef','#6477e7','#48c6a2'];
 
 export default function AdminAnalytics(){
+  const {user}=useAuth(),greeting=dashboardGreeting(user);
   const [period,setPeriod]=useState('all'),[data,setData]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState('');
   useEffect(()=>{const params=new URLSearchParams(Object.entries(getDateRange(period)).filter(([,v])=>v));setLoading(true);Promise.all([api('/admin/analytics?'+params),api('/google-sheet/normalized?'+params)]).then(([database,sheet])=>setData(mergeSheetAnalytics(database,sheet.items))).catch(e=>setError(e.message)).finally(()=>setLoading(false))},[period]);
   if(error)return <div className="alert">{error}</div>;
   const k=data?.kpis||{};
   const cards=[['Total interviews',k.total,BriefcaseBusiness,'violet'],["Today's interviews",k.today,CalendarCheck2,'cyan'],['Upcoming',k.upcoming,CalendarRange,'blue'],['Unassigned',k.unassigned,UserX,'pink'],['Candidates',k.registered,UsersRound,'blue'],['Active staff',k.activeStaff,UserCog,'amber'],['Selected / placed',k.selected,Target,'green'],['Selection rate',`${k.conversion||0}%`,TrendingUp,'pink']];
   return <div className={loading?'bi-dashboard bi-loading':'bi-dashboard'}>
-    <section className="bi-title"><div><span className="eyebrow">ADMIN INTELLIGENCE</span><h1>Interview analytics</h1><p>Live operational insights across candidates, domains and staff.</p></div><div className="quickranges compactranges">{rangeOptions.map(([key,label])=><button key={key} className={period===key?'active':''} onClick={()=>setPeriod(key)}>{label}</button>)}</div></section>
+    <section className="bi-title"><div><span className="eyebrow">{greeting.date} · ADMIN INTELLIGENCE</span><h1>{greeting.title}</h1><p>{greeting.message}</p></div><div className="quickranges compactranges">{rangeOptions.map(([key,label])=><button key={key} className={period===key?'active':''} onClick={()=>setPeriod(key)}>{label}</button>)}</div></section>
     <section className="bi-kpis executive-kpis">{cards.map(([label,value,Icon,tone])=><article className={`bi-kpi ${tone}`} key={label}><div><span>{label}</span><strong>{value??'—'}</strong></div><i><Icon/></i></article>)}</section>
     <section className="executive-calendar"><ExecutiveSummary data={data}/><InterviewCalendar role="admin"/></section>
     <section className="bi-grid">
