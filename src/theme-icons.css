@@ -1,0 +1,24 @@
+/* Theme-safe icon system: every Lucide icon follows its semantic container. */
+svg{stroke:currentColor;fill:none;color:inherit;transition:color .22s var(--ease),stroke .22s var(--ease),opacity .22s var(--ease),transform .22s var(--ease)}
+button svg,a svg,.icon svg,.brandmark svg,.logicon svg,.exporticon svg{display:block;flex:0 0 auto;stroke:currentColor!important}
+.primary,.primary svg,.brandmark,.brandmark svg,.exporticon,.exporticon svg{color:#fff!important}
+.secondary,.theme-toggle,.menu,.iconbtn,.modalclose,.pagination button{color:var(--ink)}
+.ghostbtn,.contactlink{color:var(--purple)}
+.search svg,.datefilter svg{color:var(--muted)}
+.iconbtn.danger,.iconbtn.danger svg{color:#d25568}
+.sectiontitle>span svg,.profile-note svg{color:var(--purple)}
+.exportgrid .selected i,.exportgrid .selected i svg{color:#fff!important}
+.status svg,.role svg{color:inherit}
+:root{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+:root[data-theme="dark"] .secondary,:root[data-theme="dark"] .theme-toggle,:root[data-theme="dark"] .menu,:root[data-theme="dark"] .iconbtn,:root[data-theme="dark"] .modalclose,:root[data-theme="dark"] .pagination button{color:#dfe3f4}
+:root[data-theme="dark"] .ghostbtn,:root[data-theme="dark"] .contactlink,:root[data-theme="dark"] .sectiontitle>span svg,:root[data-theme="dark"] .profile-note svg{color:#aa94ff}
+:root[data-theme="dark"] .search svg,:root[data-theme="dark"] .datefilter svg{color:#9ca5bd}
+:root[data-theme="dark"] .iconbtn.danger,:root[data-theme="dark"] .iconbtn.danger svg{color:#ff8190}
+:root[data-theme="dark"] .collapse-toggle,:root[data-theme="dark"] .profile button{color:#aaa8bf}
+input[type="date"],input[type="time"],select{color-scheme:light!important}
+:root[data-theme="dark"] input[type="date"],:root[data-theme="dark"] input[type="time"],:root[data-theme="dark"] select{color-scheme:dark!important}
+input[type="date"]::-webkit-calendar-picker-indicator,input[type="time"]::-webkit-calendar-picker-indicator{display:block;width:17px;height:17px;margin:0;padding:2px;border-radius:5px;cursor:pointer;opacity:.82;transition:filter .22s ease,opacity .22s ease,background-color .22s ease}
+:root:not([data-theme="dark"]) input[type="date"]::-webkit-calendar-picker-indicator,:root:not([data-theme="dark"]) input[type="time"]::-webkit-calendar-picker-indicator{filter:brightness(0) saturate(100%);background-color:transparent;opacity:.68}
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,:root[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(2) saturate(0);background-color:rgba(255,255,255,.04);opacity:.92}
+input[type="date"]::-webkit-calendar-picker-indicator:hover,input[type="time"]::-webkit-calendar-picker-indicator:hover{opacity:1;background-color:rgba(115,87,232,.12)}
