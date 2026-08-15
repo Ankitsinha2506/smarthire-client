@@ -6,6 +6,7 @@ const localDate = (value) => {
 
 export const rangeOptions = [
   ["today", "Today"],
+  ["tomorrow", "Tomorrow"],
   ["yesterday", "Yesterday"],
   ["7d", "Last 7 days"],
   ["15d", "Last 15 days"],
@@ -17,6 +18,11 @@ export function getDateRange(key) {
   if (key === "all") return { from: "", to: "" };
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  if (key === "tomorrow") {
+    const day = new Date(today);
+    day.setDate(day.getDate() + 1);
+    return { from: localDate(day), to: localDate(day) };
+  }
   if (key === "yesterday") {
     const day = new Date(today);
     day.setDate(day.getDate() - 1);
