@@ -1,1 +1,65 @@
 .staff-all-today .bi-chart{overscroll-behavior-y:auto}
+
+.success-alert .notice-close{margin-left:auto;border:0;background:transparent;color:currentColor;display:grid;place-items:center;padding:3px;border-radius:6px}.success-alert .notice-close:hover{background:rgba(38,124,81,.12)}
+
+/* Staff permission dialogs: keep the complete dialog inside every viewport.
+   The body is the only scroll region, so the title, close button and action
+   remain available on both short laptop screens and phones. */
+.permission-modalback {
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden !important;
+}
+
+.permission-modalback > .permission-modal {
+  width: min(600px, calc(100vw - 32px));
+  height: auto;
+  max-height: calc(100dvh - 32px);
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+}
+
+/* Add-staff includes a form and six feature cards. Give it a definite height
+   so that the form area can always become the scroll region instead of
+   extending below the browser window. */
+.permission-modalback > .create-staff-dialog {
+  height: min(760px, calc(100dvh - 32px));
+}
+
+.permission-modalback > .permission-modal .pm-head,
+.permission-modalback > .permission-modal .pm-footer {
+  min-width: 0;
+}
+
+.permission-modalback > .permission-modal .modalclose {
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.permission-modalback > .permission-modal .pm-body {
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  .permission-modalback { padding: 8px; }
+  .permission-modalback > .permission-modal {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+    border-radius: 20px;
+  }
+  .permission-modalback > .create-staff-dialog {
+    height: calc(100dvh - 16px);
+  }
+}
+
+@media (max-width: 420px) {
+  .permission-modalback > .permission-modal .pm-head { padding: 16px 46px 12px 14px; }
+  .permission-modalback > .permission-modal .pm-body { padding: 14px; }
+  .permission-modalback > .permission-modal .pm-footer { padding: 12px 14px 16px; }
+}

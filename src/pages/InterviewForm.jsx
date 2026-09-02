@@ -7,6 +7,11 @@ import {useAuth} from '../App';
 const technologies=['SQL Support / Developer','AWS / DevOps','Testing','Power BI / Tableau / Data Analytics','Data Science','Python Developer','AR Caller','Medical Coding / Billing','DV360','OSI Soft PI','Full Stack Developer','AI Engineer','Java Developer','.NET Developer','Other'];
 const roundOptions=['Test','Round 1','Round 2','Round 3','AI Interview','Manager Round','Final Round'];
 const initial={candidateName:'',interviewDate:'',interviewTime:'',candidateMobile:'',candidateEmail:'',technology:'',companyName:'',hrName:'',hrEmail:'',hrMobile:'',rounds:[],status:'Scheduled',selectedCompanyName:'',remarks:''};
+const validName=value=>/^[A-Za-z]+(?:\s+[A-Za-z]+)*$/.test(value.trim());
+const validMobile=value=>/^\d{10}$/.test(value);
+const nameOnly=value=>value.replace(/[^A-Za-z\s]/g,'');
+const mobileOnly=value=>value.replace(/\D/g,'').slice(0,10);
+const todayISO=()=>{const date=new Date();date.setMinutes(date.getMinutes()-date.getTimezoneOffset());return date.toISOString().slice(0,10)};
 
 export default function InterviewForm(){
   const {user}=useAuth(), navigate=useNavigate(), profileLocked=user.role==='user';
@@ -16,7 +21,14 @@ export default function InterviewForm(){
   const chooseRound=round=>set('rounds',[round]);
 
   async function submit(event){
-    event.preventDefault(); setBusy(true); setError('');
+    event.preventDefault(); setError('');
+    if(!validName(data.candidateName))return setError('Please enter a valid candidate name.');
+    if(!validMobile(data.candidateMobile))return setError('Please enter a valid 10-digit candidate mobile number.');
+    if(data.interviewDate<todayISO())return setError('Interview date cannot be in the past.');
+    if(!/[A-Za-z]/.test(data.companyName))return setError('Please enter a valid company name.');
+    if(!validName(data.hrName))return setError('Please enter a valid HR name.');
+    if(!validMobile(data.hrMobile))return setError('Please enter a valid 10-digit HR mobile number.');
+    setBusy(true);
     try{
       const form=new FormData();
       Object.entries(data).forEach(([key,value])=>form.append(key,key==='rounds'?JSON.stringify(value):value));
@@ -33,15 +45,15 @@ export default function InterviewForm(){
     <FormSection icon={UserRound} title="Candidate information" desc={profileLocked?'Taken securely from your registration profile':'Personal and contact details'}>
       {profileLocked&&<div className="profile-note"><LockKeyhole size={16}/> These details are protected and reused for every interview.</div>}
       <div className="formgrid">
-        <Field label="Candidate name" required><input required readOnly={profileLocked} value={data.candidateName} onChange={e=>set('candidateName',e.target.value)}/></Field>
+        <Field label="Candidate name" required><input required pattern="[A-Za-z ]+" readOnly={profileLocked} value={data.candidateName} onChange={e=>set('candidateName',nameOnly(e.target.value))}/></Field>
         <Field label="Candidate email" required><input required readOnly={profileLocked} type="email" value={data.candidateEmail} onChange={e=>set('candidateEmail',e.target.value)}/></Field>
-        <Field label="Candidate mobile" required><input required readOnly={profileLocked} value={data.candidateMobile} onChange={e=>set('candidateMobile',e.target.value)}/></Field>
+        <Field label="Candidate mobile" required><input required readOnly={profileLocked} inputMode="numeric" maxLength="10" value={data.candidateMobile} onChange={e=>set('candidateMobile',mobileOnly(e.target.value))}/></Field>
         <Field label="Technology" required><select required value={data.technology} onChange={e=>set('technology',e.target.value)}><option value="">Select technology</option>{technologies.map(x=><option key={x}>{x}</option>)}</select></Field>
       </div>
     </FormSection>
     <FormSection icon={CalendarClock} title="Schedule & rounds" desc="Choose the date, time and interview flow">
       <div className="formgrid">
-        <Field label="Interview date" required><input required type="date" value={data.interviewDate} onChange={e=>set('interviewDate',e.target.value)}/></Field>
+        <Field label="Interview date" required><input required type="date" min={todayISO()} value={data.interviewDate} onChange={e=>set('interviewDate',e.target.value)}/></Field>
         <Field label="Interview time" required><input required type="time" value={data.interviewTime} onChange={e=>set('interviewTime',e.target.value)}/></Field>
         <div className="full"><span className="fieldlabel">Interview round <b>*</b></span><div className="checks radios">{roundOptions.map(x=><label className={data.rounds[0]===x?'checked':''} key={x}><input required type="radio" name="interviewRound" value={x} checked={data.rounds[0]===x} onChange={()=>chooseRound(x)}/><i>{data.rounds[0]===x&&<span/>}</i>{x}</label>)}</div></div>
       </div>
@@ -49,9 +61,9 @@ export default function InterviewForm(){
     <FormSection icon={Building2} title="Company & HR" desc="Organization and point-of-contact details">
       <div className="formgrid">
         <Field label="Company name" required><input required value={data.companyName} onChange={e=>set('companyName',e.target.value)}/></Field>
-        <Field label="HR name" required><input required value={data.hrName} onChange={e=>set('hrName',e.target.value)}/></Field>
+        <Field label="HR name" required><input required pattern="[A-Za-z ]+" value={data.hrName} onChange={e=>set('hrName',nameOnly(e.target.value))}/></Field>
         <Field label="HR email" required><input required type="email" value={data.hrEmail} onChange={e=>set('hrEmail',e.target.value)}/></Field>
-        <Field label="HR mobile" required><input required value={data.hrMobile} onChange={e=>set('hrMobile',e.target.value)}/></Field>
+        <Field label="HR mobile" required><input required inputMode="numeric" maxLength="10" value={data.hrMobile} onChange={e=>set('hrMobile',mobileOnly(e.target.value))}/></Field>
       </div>
     </FormSection>
     <FormSection icon={ClipboardCheck} title="Outcome & documents" desc="Track status and attach supporting files">
