@@ -11,8 +11,6 @@ import {
   X,
   Sun,
   Moon,
-  PanelLeftClose,
-  PanelLeftOpen,
   KeyRound,
   Sheet,
 } from "lucide-react";
@@ -36,8 +34,29 @@ export default function Layout() {
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", String(collapsed));
   }, [collapsed]);
+  useEffect(() => {
+    const media = matchMedia("(max-width: 1024px)");
+    const syncLayout = (event) => {
+      if (!event.matches) setOpen(false);
+    };
+    media.addEventListener("change", syncLayout);
+    return () => media.removeEventListener("change", syncLayout);
+  }, []);
+  useEffect(() => {
+    document.body.classList.toggle("nav-open", open);
+    const closeOnEscape = (event) => event.key === "Escape" && setOpen(false);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.classList.remove("nav-open");
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
   const has = (permission) =>
     user.role !== "staff" || user.permissions?.[permission] !== false;
+  const toggleSidebarFromLogo = () => {
+    if (matchMedia("(max-width: 1024px)").matches) return setOpen(false);
+    setCollapsed((current) => !current);
+  };
   const links = [
     ...(has("dashboard") ? [["/", LayoutDashboard, "Overview"]] : []),
     ...(has("interviews") ? [["/interviews", CalendarDays, "Interviews"]] : []),
@@ -61,22 +80,22 @@ export default function Layout() {
     <div className={collapsed ? "shell sidebar-collapsed" : "shell"}>
       <aside className={open ? "sidebar open" : "sidebar"}>
         <div className="brand">
-          <img className="brandmark" src="/smarthire-mark.svg" alt="SmartHire" />
-          <span className="brandtext">
-            Smart<span>Hire</span>
-          </span>
-          <button className="mobile-close" onClick={() => setOpen(false)}>
+          <button
+            type="button"
+            className="brand-toggle"
+            onClick={toggleSidebarFromLogo}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            <span className="brand-symbol" aria-hidden="true">
+              <img src="/smarthire-full.png" alt="" />
+            </span>
+            <span className="brand-word"><span>Smart</span><b>Hire</b></span>
+          </button>
+          <button className="mobile-close" onClick={() => setOpen(false)} aria-label="Close navigation">
             <X />
           </button>
         </div>
-        <button
-          className="collapse-toggle"
-          onClick={() => setCollapsed(!collapsed)}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
-          <span>{collapsed ? "Expand" : "Collapse sidebar"}</span>
-        </button>
         <nav>
           {links.map(([to, Icon, label]) => (
             <NavLink
@@ -102,10 +121,10 @@ export default function Layout() {
           </button>
         </div>
       </aside>
-      {open && <div className="scrim" onClick={() => setOpen(false)} />}
+      {open && <div className="scrim" onClick={() => setOpen(false)} aria-hidden="true" />}
       <main>
         <header className="topbar">
-          <button className="menu" onClick={() => setOpen(true)}>
+          <button className="menu" onClick={() => setOpen(true)} aria-label="Open navigation" aria-expanded={open}>
             <Menu />
           </button>
           <div>
