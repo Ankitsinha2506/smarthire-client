@@ -1,5 +1,7 @@
 .staff-all-today .bi-chart{overscroll-behavior-y:auto}
 
+.logo-light img,.mobile-logo img{width:30px;height:30px;flex:0 0 30px}.brandmark{object-fit:contain}
+
 .success-alert .notice-close{margin-left:auto;border:0;background:transparent;color:currentColor;display:grid;place-items:center;padding:3px;border-radius:6px}.success-alert .notice-close:hover{background:rgba(38,124,81,.12)}
 
 /* Staff permission dialogs: keep the complete dialog inside every viewport.

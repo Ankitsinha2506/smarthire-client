@@ -9,7 +9,6 @@ import {
   LogOut,
   Menu,
   X,
-  Sparkles,
   Sun,
   Moon,
   PanelLeftClose,
@@ -62,9 +61,7 @@ export default function Layout() {
     <div className={collapsed ? "shell sidebar-collapsed" : "shell"}>
       <aside className={open ? "sidebar open" : "sidebar"}>
         <div className="brand">
-          <span className="brandmark">
-            <Sparkles size={21} />
-          </span>
+          <img className="brandmark" src="/smarthire-mark.svg" alt="SmartHire" />
           <span className="brandtext">
             Smart<span>Hire</span>
           </span>
