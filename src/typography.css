@@ -320,7 +320,25 @@
 .sheet-row{background:rgba(52,168,83,.025)}.sheet-row .person strong:after{content:'Google';display:inline-flex;margin-left:7px;padding:2px 6px;border-radius:999px;background:rgba(52,168,83,.12);color:#27834b;font-size:8px;font-weight:800;vertical-align:middle}:root[data-theme="dark"] .sheet-row{background:rgba(68,190,105,.035)}
 
 /* Draw attention to the primary dashboard action without hiding its focus state. */
-.book-slot-cta{background:linear-gradient(135deg,#ffad31,#f5654d 55%,#dd3f82);color:#fff;box-shadow:0 10px 24px rgba(230,82,75,.3),inset 0 1px rgba(255,255,255,.4);animation:book-slot-blink 1.5s ease-in-out infinite}.book-slot-cta:hover,.book-slot-cta:focus-visible{background:linear-gradient(135deg,#ffc052,#ff7258 55%,#ec5296);animation-play-state:paused}.book-slot-cta:focus-visible{outline:3px solid rgba(245,101,77,.32);outline-offset:3px}@keyframes book-slot-blink{0%,100%{transform:translateY(0) scale(1);box-shadow:0 10px 24px rgba(230,82,75,.3),inset 0 1px rgba(255,255,255,.4)}50%{transform:translateY(-2px) scale(1.025);box-shadow:0 0 0 7px rgba(245,101,77,.14),0 16px 34px rgba(221,63,130,.38),inset 0 1px rgba(255,255,255,.55)}}
+/* Keep the booking call to action within the workspace violet palette. */
+.book-slot-cta{
+  background:linear-gradient(135deg,#7960e6,var(--purple,#6d54de) 55%,#5941bd);
+  color:#fff;
+  box-shadow:0 8px 22px rgba(109,84,222,.24),inset 0 1px rgba(255,255,255,.22);
+  animation:book-slot-blink 1.5s ease-in-out infinite;
+}
+.book-slot-cta:hover,.book-slot-cta:focus-visible{
+  background:linear-gradient(135deg,#826aec,#7157df 55%,#634bc9);
+  color:#fff;
+  animation-play-state:paused;
+}
+.book-slot-cta:focus-visible{outline:3px solid rgba(109,84,222,.35);outline-offset:4px}
+@keyframes book-slot-blink{
+  0%,100%{transform:translateY(0) scale(1);box-shadow:0 8px 22px rgba(109,84,222,.24),inset 0 1px rgba(255,255,255,.22)}
+  50%{transform:translateY(-2px) scale(1.025);box-shadow:0 0 0 6px rgba(109,84,222,.10),0 14px 30px rgba(109,84,222,.32),inset 0 1px rgba(255,255,255,.32)}
+}
+@media(prefers-reduced-motion:reduce){.book-slot-cta{animation:none}}
+
 
 /* Live context clock in the admin intelligence header. */
 .bi-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.bi-live-clock{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid rgba(115,87,232,.24);border-radius:999px;background:linear-gradient(135deg,rgba(115,87,232,.12),rgba(67,184,219,.09));color:#624ecd;font-family:Manrope,sans-serif;font-size:11px;font-weight:800;letter-spacing:.03em;box-shadow:inset 0 1px rgba(255,255,255,.65),0 2px 8px rgba(115,87,232,.08);white-space:nowrap}.bi-live-clock svg{color:#38afd2}:root[data-theme="dark"] .bi-live-clock{border-color:rgba(166,143,255,.28);background:linear-gradient(135deg,rgba(130,99,240,.22),rgba(50,172,209,.12));color:#e0d9ff;box-shadow:inset 0 1px rgba(255,255,255,.08),0 2px 8px rgba(0,0,0,.25)}:root[data-theme="dark"] .bi-live-clock svg{color:#5ed6f3}.staff-hero-clock{background:rgba(255,255,255,.14)!important;border-color:rgba(255,255,255,.25)!important;color:#fff!important;box-shadow:inset 0 1px rgba(255,255,255,.3)!important}.staff-hero-clock svg{color:#ffe28c!important}@media(max-width:520px){.bi-meta{gap:7px}.bi-live-clock{padding:3px 8px;font-size:10px}.bi-live-clock svg{width:12px;height:12px}}

@@ -1,3 +1,4 @@
+import Pagination from '../components/Pagination';
 import React,{useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Search,Download,Trash2,ChevronLeft,ChevronRight,Eye,X,Upload,FileSpreadsheet,CheckCircle2,Columns3,Pencil,Save} from 'lucide-react';
@@ -14,12 +15,21 @@ const mobileOnly=value=>value.replace(/\D/g,'').slice(0,10);
 const nameOnly=value=>value.replace(/[^A-Za-z\s]/g,'');
 
 export default function Interviews(){
-  const {user}=useAuth(),fileRef=useRef(),[items,setItems]=useState([]),[sheetItems,setSheetItems]=useState([]),[selected,setSelected]=useState(null),[showExport,setShowExport]=useState(false),[meta,setMeta]=useState({page:1,pages:1,total:0});
-  const [filters,setFilters]=useState(()=>({search:'',status:'',technology:'',...getDateRange('today'),page:1})),[quickRange,setQuickRange]=useState('today'),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState(''),[importing,setImporting]=useState(false);
+  const {user}=useAuth(),fileRef=useRef(),[items,setItems]=useState([]),[selected,setSelected]=useState(null),[showExport,setShowExport]=useState(false),[meta,setMeta]=useState({page:1,pages:1,total:0});
+  const [filters,setFilters]=useState(()=>({search:'',status:'',technology:'',...getDateRange('today'),page:1,limit:10})),[quickRange,setQuickRange]=useState('today'),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState(''),[importing,setImporting]=useState(false);
   useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),4000);return()=>clearTimeout(t)},[notice]);
   const qs=()=>new URLSearchParams(Object.entries(filters).filter(([,value])=>value)).toString();
-  function load(){setLoading(true);const sheetEnabled=user.role==='admin'||(user.role==='staff'&&user.permissions?.googleSheet!==false);Promise.all([api('/interviews?'+qs()),sheetEnabled?api('/google-sheet/normalized?'+qs()):Promise.resolve({items:[],total:0})]).then(([result,sheet])=>{setItems([...sheet.items,...result.items]);setSheetItems(sheet.items);setMeta({...result,total:result.total+sheet.total})}).catch(e=>setError(e.message)).finally(()=>setLoading(false))}
-  useEffect(()=>{const timer=setTimeout(load,250);return()=>clearTimeout(timer)},[JSON.stringify(filters)]);
+  const requestRef=useRef(null);
+  function load(){
+    requestRef.current?.abort();
+    const controller=new AbortController();requestRef.current=controller;
+    setLoading(true);setError('');
+    api('/interviews?'+qs()+'&includeSheet=true',{signal:controller.signal})
+      .then(result=>{if(!controller.signal.aborted){setItems(result.items);setMeta(result)}})
+      .catch(e=>{if(!controller.signal.aborted)setError(e.message)})
+      .finally(()=>{if(!controller.signal.aborted)setLoading(false)});
+  }
+  useEffect(()=>{requestRef.current?.abort();setLoading(true);const timer=setTimeout(load,filters.search?250:0);return()=>{clearTimeout(timer);requestRef.current?.abort()}},[JSON.stringify(filters)]);
   async function remove(id){if(String(id).startsWith('sheet-'))return setError('Google Form responses are read-only. Update them in Google Sheets.');if(!confirm('Delete this interview permanently?'))return;await api('/interviews/'+id,{method:'DELETE'});load()}
   async function importSheet(event){const file=event.target.files[0];if(!file)return;setImporting(true);setError('');setNotice('');try{const form=new FormData();form.append('file',file);const result=await api('/interviews/import',{method:'POST',body:form});setNotice(`${result.imported} records imported${result.failed?`; ${result.failed} rows failed validation`:''}.`);load()}catch(e){setError(e.message)}finally{setImporting(false);event.target.value=''}}
   async function setPlaced(item,placed){try{await api(`/interviews/${item._id}/placement`,{method:'PATCH',body:JSON.stringify({placed})});setSelected(null);load()}catch(e){setError(e.message)}}
@@ -34,7 +44,7 @@ export default function Interviews(){
     <div className="quickranges"><span>Show:</span>{rangeOptions.map(([key,label])=><button key={key} className={quickRange===key?'active':''} onClick={()=>applyRange(key)}>{label}</button>)}</div>
     <div className="filters"><label className="search"><Search/><input placeholder="Search candidate, email, company…" value={filters.search} onChange={e=>setFilters({...filters,search:e.target.value,page:1})}/></label><select value={filters.status} onChange={e=>setFilters({...filters,status:e.target.value,page:1})}><option value="">All statuses</option>{statuses.map(x=><option key={x}>{x}</option>)}</select><select value={filters.technology} onChange={e=>setFilters({...filters,technology:e.target.value,page:1})}><option value="">All technologies</option>{technologies.map(x=><option key={x}>{x}</option>)}</select><label className="datefilter"><span>From</span><input type="date" value={filters.from} onChange={e=>{setQuickRange('custom');setFilters({...filters,from:e.target.value,page:1})}}/></label><label className="datefilter"><span>To</span><input type="date" value={filters.to} onChange={e=>{setQuickRange('custom');setFilters({...filters,to:e.target.value,page:1})}}/></label></div>
     <div className="tablewrap"><table className="interviewtable"><thead><tr><th>Candidate</th><th>Interview</th><th>Technology</th><th>Company</th><th>HR contact</th><th>Support staff</th><th>Round</th><th>Status</th><th>Actions</th></tr></thead><tbody>{loading?<tr><td colSpan="9" className="empty">Loading interviews…</td></tr>:items.length?items.map(item=><tr key={item._id}><td><div className="person"><span>{item.candidateName.slice(0,2).toUpperCase()}</span><div><strong>{item.candidateName}</strong><small>{item.candidateEmail}</small><small>{item.candidateMobile}</small></div></div></td><td><strong>{new Date(item.interviewDate).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</strong><small className="block">{formatInterviewTime(item.interviewTime)}</small></td><td>{item.technology}</td><td><strong>{item.companyName}</strong></td><td><strong>{item.hrName}</strong><a className="contactlink" href={`mailto:${item.hrEmail}`}>{item.hrEmail}</a><a className="contactlink" href={`tel:${item.hrMobile}`}>{item.hrMobile}</a></td><td><div className="assigned-names">{item.assignedStaff?.length?item.assignedStaff.map(person=><span key={person._id}>{person.name}</span>):<em>Unassigned</em>}</div></td><td>{item.rounds?.[0]||'—'}</td><td><span className={`status ${item.status.toLowerCase().replace(' ','-')}`}>{item.status}</span></td><td className="actions"><button title="View all details" className="iconbtn" onClick={()=>setSelected(item)}><Eye size={17}/></button>{user.role==='user'&&item.status==='Selected'&&<button className="placedbtn" onClick={()=>setPlaced(item,true)}>Mark placed</button>}{user.role==='admin'&&<button title="Delete" className="iconbtn danger" onClick={()=>remove(item._id)}><Trash2 size={16}/></button>}</td></tr>):<tr><td colSpan="9" className="empty">No interviews match these filters.</td></tr>}</tbody></table></div>
-    <div className="pagination"><span>Page {meta.page} of {meta.pages||1}</span><div><button disabled={meta.page<=1} onClick={()=>setFilters({...filters,page:meta.page-1})}><ChevronLeft/></button><button disabled={meta.page>=meta.pages} onClick={()=>setFilters({...filters,page:meta.page+1})}><ChevronRight/></button></div></div>
+    <Pagination page={meta.page} pages={meta.pages} total={meta.total} limit={filters.limit} loading={loading} setPage={page=>setFilters(current=>({...current,page}))} setLimit={limit=>setFilters(current=>({...current,limit,page:1}))}/>
     {selected&&<Details item={selected} user={user} close={()=>setSelected(null)} refreshed={load} saved={()=>{setSelected(null);setNotice('Interview details updated successfully.');load()}}/>} 
     {showExport&&<ExportDialog filters={qs()} close={()=>setShowExport(false)}/>} 
   </section>
@@ -53,7 +63,7 @@ function Details({item,user,close,saved,refreshed}){
   const initiallyAssigned=(item.assignedStaff||[]).some(person=>String(person._id)===String(user.id));
   const [editing,setEditing]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[staff,setStaff]=useState([]),[selfAssigned,setSelfAssigned]=useState(initiallyAssigned);
   const [form,setForm]=useState({interviewDate:new Date(item.interviewDate).toISOString().slice(0,10),interviewTime:item.interviewTime,technology:item.technology,companyName:item.companyName,hrName:item.hrName,hrEmail:item.hrEmail,hrMobile:item.hrMobile,interviewRound:item.rounds?.[0]||'',status:item.status,selectedCompanyName:item.selectedCompanyName||'',remarks:item.remarks||'',assignedStaff:(item.assignedStaff||[]).map(person=>person._id)});
-  useEffect(()=>{if(user.role==='admin')api('/admin/users').then(users=>setStaff(users.filter(person=>person.role==='staff'&&person.active))).catch(e=>setError(e.message))},[user.role]);
+  useEffect(()=>{if(user.role==='admin')api('/admin/users?internal=true').then(users=>setStaff(users.filter(person=>person.role==='staff'&&person.active))).catch(e=>setError(e.message))},[user.role]);
   const set=(key,value)=>setForm(current=>({...current,[key]:value}));
   async function save(){setBusy(true);setError('');try{await api('/interviews/'+item._id,{method:'PUT',body:JSON.stringify({...form,rounds:form.interviewRound?[form.interviewRound]:[]})});saved()}catch(e){setError(e.message)}finally{setBusy(false)}}
   async function saveGoogleAssignment(){setBusy(true);setError('');try{await api(`/google-sheet/${item.sheetRow}/assignment`,{method:'PATCH',body:JSON.stringify({assignedStaff:form.assignedStaff})});setNoticeAndRefresh()}catch(e){setError(e.message)}finally{setBusy(false)}}

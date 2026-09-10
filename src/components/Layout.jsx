@@ -14,6 +14,7 @@ import {
   KeyRound,
   Sheet,
 } from "lucide-react";
+import BookingNotifications from "./BookingNotifications";
 import { useAuth } from "../App";
 
 export default function Layout() {
@@ -63,6 +64,7 @@ export default function Layout() {
     ...(user.role !== "admin" && has("createInterview")
       ? [["/interviews/new", FilePlus2, "Book Your Slot"]]
       : []),
+    ...(["admin", "staff"].includes(user.role) ? [["/booking-requests", CalendarDays, user.role === "admin" ? "Booking approvals" : "My requests"]] : []),
     ...(user.role !== "user" && has("googleSheet")
       ? [["/google-sheet", Sheet, "Google responses"]]
       : []),
@@ -101,7 +103,7 @@ export default function Layout() {
             <NavLink
               key={to}
               to={to}
-              end={to === "/"}
+              end
               onClick={() => setOpen(false)}
               title={collapsed ? label : undefined}
             >
@@ -132,6 +134,7 @@ export default function Layout() {
             <p>Plan better. Hire smarter.</p>
           </div>
           <div className="topactions">
+            {["admin", "staff"].includes(user.role) && <BookingNotifications role={user.role}/>}
             <button
               className="theme-toggle"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}

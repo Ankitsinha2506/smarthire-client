@@ -1,15 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { api } from "./api";
-import Login from "./pages/Login";
+const Login = lazy(() => import("./pages/Login"));
 import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
-import Interviews from "./pages/Interviews";
-import InterviewForm from "./pages/InterviewForm";
-import Users from "./pages/Users";
-import Audit from "./pages/Audit";
-import ChangePassword from "./pages/ChangePassword";
-import GoogleSheet from "./pages/GoogleSheet";
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Interviews = lazy(() => import("./pages/Interviews"));
+const InterviewForm = lazy(() => import("./pages/InterviewForm"));
+const Users = lazy(() => import("./pages/Users"));
+const Audit = lazy(() => import("./pages/Audit"));
+const ChangePassword = lazy(() => import("./pages/ChangePassword"));
+const BookingRequests = lazy(() => import("./pages/BookingRequests"));
+const GoogleSheet = lazy(() => import("./pages/GoogleSheet"));
 const Auth = createContext();
 export const useAuth = () => useContext(Auth);
 function Guard({ children, roles }) {
@@ -58,7 +59,7 @@ export default function App() {
   };
   return (
     <Auth.Provider value={{ user, setUser, loading, logout }}>
-      <Routes>
+      <Suspense fallback={<div className="center"><span className="loader" /></div>}><Routes>
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
         <Route
           path="/"
@@ -94,6 +95,7 @@ export default function App() {
               </Guard>
             }
           />
+          <Route path="booking-requests" element={<Guard roles={["admin", "staff"]}><BookingRequests /></Guard>} />
           <Route
             path="google-sheet"
             element={
@@ -137,7 +139,7 @@ export default function App() {
           />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      </Routes></Suspense>
     </Auth.Provider>
   );
 }

@@ -82,7 +82,7 @@ export default function Users() {
     }),
     [error, setError] = useState("");
   const load = () =>
-    Promise.all([api("/admin/users"), api("/admin/candidate-summary")]).then(
+    Promise.all([api("/admin/users?internal=true"), api("/admin/candidate-summary")]).then(
       ([u, c]) => {
         setUsers(u);
         setCandidates(c);

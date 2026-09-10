@@ -1,0 +1,33 @@
+.booking-notifications{position:relative}
+.booking-bell{position:relative}
+.booking-bell b{position:absolute;right:-5px;top:-5px;min-width:18px;padding:2px 4px;border-radius:12px;background:#e14c67;color:#fff;font-size:10px;line-height:14px;text-align:center;border:2px solid var(--bg)}
+.booking-notification-panel{position:absolute;right:0;top:calc(100% + 12px);width:min(370px,calc(100vw - 32px));background:var(--white,#fff);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 16px 45px rgba(23,20,52,.18);overflow:hidden;z-index:40}
+.booking-notification-panel header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:17px;border-bottom:1px solid var(--line)}
+.booking-notification-panel header span{color:var(--purple);font-size:11px;font-weight:700}
+.booking-notification-panel a{display:flex;gap:12px;padding:15px 17px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line)}
+.booking-notification-panel a:hover{background:rgba(109,84,222,.07)}
+.booking-notification-panel a svg{flex-shrink:0;color:var(--purple);margin-top:3px}
+.booking-notification-panel a strong{display:block;font-size:12px;line-height:1.6}
+.booking-notification-panel a small{display:block;color:var(--muted);font-size:11px;margin-top:5px}
+.booking-notification-panel p{padding:17px;margin:0;color:var(--muted);font-size:12px}
+.booking-notification-panel .booking-notification-footer{justify-content:center;color:var(--purple);font-size:12px;font-weight:700;border:0}
+.booking-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 28px 22px;color:var(--muted);font-size:13px}
+.booking-toolbar label{display:flex;align-items:center;gap:10px}
+.booking-toolbar select{border:1px solid var(--line);border-radius:10px;background:var(--glass-soft,#fff);color:var(--ink);padding:10px 12px}
+.booking-list{display:grid;gap:16px;padding:0 28px 24px}
+.booking-card{padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--glass-soft,#fff)}
+.booking-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.booking-card h3{font-size:16px;margin:0 0 5px}.booking-card-heading p{font-size:12px;color:var(--muted);margin:0;line-height:1.6}
+.booking-status{padding:6px 10px;border-radius:20px;white-space:nowrap;font-size:11px;font-weight:700}
+.booking-status.pending{background:#fff1d6;color:#8b5b0b}.booking-status.approved{background:#e3f6eb;color:#237147}.booking-status.rejected{background:#fce6eb;color:#ad3452}
+.booking-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:20px 0}
+.booking-facts small{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}.booking-facts strong{font-size:12px;font-weight:600;overflow-wrap:anywhere;white-space:pre-wrap}
+.booking-details summary{font-size:12px;color:var(--purple);font-weight:600;cursor:pointer;padding:8px 0}
+.booking-note{color:var(--muted);font-size:12px;line-height:1.7;margin:12px 0 0}.booking-note+.secondary{margin-top:14px}
+.booking-review{border-top:1px solid var(--line);margin-top:18px;padding-top:16px;display:flex;align-items:flex-end;gap:20px;justify-content:space-between}
+.booking-review label{flex:1;color:var(--muted);font-size:12px}
+.booking-review textarea{display:block;width:100%;resize:vertical;margin-top:8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--glass-soft,#fff);color:var(--ink)}
+.booking-review>div{display:flex;gap:8px}.booking-review button{font-size:12px;white-space:nowrap}
+.booking-page>.alert,.booking-page>.success-alert{margin:0 28px 20px}
+:root[data-theme="dark"] .booking-notification-panel{background:#20243b}
+@media(max-width:640px){.booking-list{padding:0 16px 18px}.booking-toolbar{padding:0 16px 18px;flex-wrap:wrap}.booking-card{padding:16px}.booking-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-card-heading{flex-wrap:wrap}.booking-review{align-items:stretch;flex-direction:column;gap:12px}.booking-review>div{justify-content:flex-end}.booking-notification-panel{position:fixed;right:16px;top:74px;max-height:75dvh;overflow:auto}}
