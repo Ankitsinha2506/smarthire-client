@@ -31,3 +31,74 @@
 .booking-page>.alert,.booking-page>.success-alert{margin:0 28px 20px}
 :root[data-theme="dark"] .booking-notification-panel{background:#20243b}
 @media(max-width:640px){.booking-list{padding:0 16px 18px}.booking-toolbar{padding:0 16px 18px;flex-wrap:wrap}.booking-card{padding:16px}.booking-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-card-heading{flex-wrap:wrap}.booking-review{align-items:stretch;flex-direction:column;gap:12px}.booking-review>div{justify-content:flex-end}.booking-notification-panel{position:fixed;right:16px;top:74px;max-height:75dvh;overflow:auto}}
+
+/* Compact approvals workspace; scoped to avoid changing other tables. */
+.panel.tablepanel.booking-page{border-radius:20px;min-width:0;box-shadow:0 8px 28px rgba(35,27,77,.06)}
+.booking-page .pagehead{padding:22px 24px 18px;margin:0;align-items:center;gap:16px}
+.booking-page .pagehead>div{min-width:0}
+.booking-page .eyebrow{font-size:10px;letter-spacing:.14em}
+.booking-page .pagehead h1{font-size:clamp(21px,2.2vw,27px);line-height:1.25;margin:5px 0 6px;letter-spacing:-.7px}
+.booking-page .pagehead p{font-size:12px;line-height:1.6;margin:0}
+.booking-page .pagehead>.secondary{flex-shrink:0;min-height:38px;padding:9px 13px;border-radius:10px;font-size:12px;box-shadow:none}
+.booking-page .booking-toolbar{padding:12px 24px;margin-bottom:16px;border-block:1px solid var(--line);background:rgba(115,87,232,.025);gap:12px;font-size:12px}
+.booking-page .booking-toolbar label{gap:10px;min-width:0}
+.booking-page .booking-toolbar select{min-height:36px;max-width:100%;padding:7px 30px 7px 10px;font-size:12px;border-radius:8px}
+.booking-count{font-size:11px;font-weight:600;white-space:nowrap;padding:4px 9px;border:1px solid var(--line);border-radius:6px;background:var(--glass-soft)}
+.booking-page .booking-list{padding:0 24px 18px;gap:12px}
+.booking-page .booking-card{padding:16px 18px;border-radius:12px;min-width:0;box-shadow:0 2px 5px rgba(35,27,77,.025)}
+.booking-identity{display:flex;align-items:center;gap:11px;min-width:0}
+.booking-identity>div{min-width:0}
+.booking-avatar{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:11px;background:rgba(115,87,232,.1);color:var(--purple);font-size:13px;font-weight:750}
+.booking-page .booking-card h3{font-size:15px;line-height:1.4;margin:0 0 3px;overflow-wrap:anywhere}
+.booking-page .booking-card-heading p{font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.booking-page .booking-status{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;font-size:10px;border-radius:7px}
+.booking-page .booking-facts{gap:14px;margin:14px 0;padding:12px 0;border-block:1px solid var(--line)}
+.booking-page .booking-facts>div{min-width:0}
+.booking-page .booking-facts small{display:flex;align-items:center;gap:5px;font-size:10px;margin-bottom:4px}
+.booking-page .booking-facts small svg{flex-shrink:0}
+.booking-page .booking-facts strong{display:block;font-size:12px;line-height:1.5}
+.booking-page .booking-details summary{display:flex;align-items:center;gap:5px;width:fit-content;min-height:32px;padding:5px 0;font-size:11px;list-style:none}
+.booking-details summary::-webkit-details-marker{display:none}
+.booking-details[open]>summary svg{transform:rotate(90deg)}
+.booking-page .booking-details .booking-facts{padding:12px;border:0;border-radius:8px;background:rgba(115,87,232,.04);margin:6px 0 10px}
+.booking-page .booking-note{font-size:11px;line-height:1.6;margin:5px 0 0;overflow-wrap:anywhere}
+.booking-page .booking-review{margin-top:12px;padding-top:12px;gap:16px}
+.booking-page .booking-review textarea{margin-top:5px;min-height:58px;font-size:12px}
+.booking-page .booking-review button{min-height:38px;padding:9px 12px;border-radius:9px}
+.booking-page>.alert,.booking-page>.success-alert{margin:0 24px 14px}
+.booking-page .empty{padding:30px 16px}
+.booking-page .pagination.pager{padding:12px 24px;gap:12px;font-size:11px;flex-wrap:wrap}
+.booking-page .pager-controls{gap:16px}
+.booking-page .pager-size{font-size:11px}
+.booking-page .pager-select select{height:34px;width:64px;border-radius:8px}
+.booking-page .pagination.pager button{height:34px;min-width:72px;padding:0 10px;font-size:11px;border-radius:8px}
+.booking-page .pagination.pager button:disabled{background:var(--glass-soft);border-color:var(--line);color:var(--muted);opacity:.55}
+.booking-page :is(button,select,textarea,summary):focus-visible{outline:2px solid var(--purple);outline-offset:3px}
+:root[data-theme="dark"] .booking-page .booking-status.approved{background:#193d32;color:#91dfb1}
+:root[data-theme="dark"] .booking-page .booking-status.pending{background:#44351d;color:#f0cb80}
+:root[data-theme="dark"] .booking-page .booking-status.rejected{background:#482737;color:#f2a6bb}
+@media(max-width:760px){
+  .booking-page .pagehead{padding:18px 16px 14px;flex-direction:row;align-items:flex-start}
+  .booking-page .booking-toolbar{padding:10px 16px}
+  .booking-page .booking-list{padding:0 16px 14px}
+  .booking-page .booking-card{padding:14px}
+  .booking-page .pagination.pager{padding:12px 16px}
+  .booking-page>.alert,.booking-page>.success-alert{margin-inline:16px}
+}
+@media(max-width:480px){
+  .booking-page .pagehead{flex-wrap:wrap;gap:12px}
+  .booking-page .pagehead>div{flex:1 1 220px}
+  .booking-page .booking-card-heading{gap:10px;flex-wrap:wrap}
+  .booking-page .booking-avatar{flex-basis:32px;height:32px;border-radius:9px;font-size:11px}
+  .booking-page .booking-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .booking-page .booking-facts>div:first-child{grid-column:1/-1}
+  .booking-page .booking-details .booking-facts{grid-template-columns:1fr}
+  .booking-page .booking-toolbar{flex-wrap:wrap;gap:8px}
+  .booking-page .booking-toolbar label{flex-wrap:wrap}
+  .booking-page .booking-review>div{width:100%}
+  .booking-page .booking-review button{flex:1;min-height:42px}
+  .booking-page .pager-controls{gap:10px;flex-wrap:wrap}
+  .booking-page .pager-summary{font-size:11px;white-space:normal}
+  .booking-page .pager-actions{margin-left:auto}
+  .booking-page .pagination.pager button,.booking-page .pager-select select{height:40px}
+}
