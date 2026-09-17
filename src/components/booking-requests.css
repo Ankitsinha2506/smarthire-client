@@ -102,3 +102,17 @@
   .booking-page .pager-actions{margin-left:auto}
   .booking-page .pagination.pager button,.booking-page .pager-select select{height:40px}
 }
+
+.booking-notification-panel{width:min(430px,calc(100vw - 32px));max-height:calc(100dvh - 120px);overflow-y:auto}
+.notification-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 17px;background:rgba(109,84,222,.06);font-size:12px}
+.notification-section-heading span{color:var(--muted);font-size:11px}
+.notification-section-heading button,.interview-notification-item button{border:0;background:transparent;color:var(--purple);cursor:pointer;font:inherit;font-size:11px;padding:5px}
+.notification-section-heading button:disabled,.interview-notification-item button:disabled{opacity:.5;cursor:wait}
+.interview-notification-list{max-height:320px;overflow-y:auto}
+.interview-notification-item{display:flex;align-items:flex-start;gap:12px;padding:15px 17px;border-bottom:1px solid var(--line)}
+.interview-notification-item>svg{flex-shrink:0;color:var(--purple);margin-top:3px}
+.interview-notification-item>div{flex:1;min-width:0;overflow-wrap:anywhere}
+.interview-notification-item strong{font-size:13px;display:block;line-height:1.5}
+.interview-notification-item small{display:block;color:var(--muted);font-size:11px;margin-top:5px;line-height:1.5}
+.interview-notification-item .notification-technology{color:var(--purple);font-weight:600;white-space:pre-wrap}
+.booking-notifications button:focus-visible{outline:2px solid var(--purple);outline-offset:2px}

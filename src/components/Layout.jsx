@@ -134,7 +134,7 @@ export default function Layout() {
             <p>Plan better. Hire smarter.</p>
           </div>
           <div className="topactions">
-            {["admin", "staff"].includes(user.role) && <BookingNotifications role={user.role}/>}
+            {["admin", "staff"].includes(user.role) && <BookingNotifications key={user.id || user._id} role={user.role} userId={user.id || user._id}/>}
             <button
               className="theme-toggle"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}

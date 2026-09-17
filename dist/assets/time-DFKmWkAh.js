@@ -1,1 +1,0 @@
-function o(e){const t=String(e??"").trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?$/i);if(!t)return e||"—";let r=Number(t[1]);const n=t[2],i=t[3]?.toUpperCase();return r>(i?12:23)||Number(n)>59?e:(i==="AM"&&r===12&&(r=0),i==="PM"&&r<12&&(r+=12),`${r%12||12}:${n}:00 ${r>=12?"PM":"AM"}`)}export{o as f};
