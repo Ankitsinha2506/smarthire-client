@@ -1,3 +1,4 @@
+import {refreshWorkspace, useWorkspaceRefresh} from '../hooks/useWorkspaceRefresh';
 import React, { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import {
@@ -13,11 +14,13 @@ import {
   Moon,
   KeyRound,
   Sheet,
+  RefreshCw,
 } from "lucide-react";
 import BookingNotifications from "./BookingNotifications";
 import { useAuth } from "../App";
 
 export default function Layout() {
+  const {refreshing} = useWorkspaceRefresh();
   const { user, logout } = useAuth(),
     [open, setOpen] = useState(false),
     [collapsed, setCollapsed] = useState(
@@ -134,6 +137,17 @@ export default function Layout() {
             <p>Plan better. Hire smarter.</p>
           </div>
           <div className="topactions">
+            <button
+              type="button"
+              className="theme-toggle workspace-refresh"
+              onClick={refreshWorkspace}
+              disabled={refreshing}
+              aria-label={refreshing ? "Refreshing workspace data" : "Refresh workspace data"}
+              aria-busy={refreshing}
+              title={refreshing ? "Refreshing…" : "Refresh workspace data"}
+            >
+              <RefreshCw className={refreshing ? "spinning" : ""} />
+            </button>
             {["admin", "staff"].includes(user.role) && <BookingNotifications key={user.id || user._id} role={user.role} userId={user.id || user._id}/>}
             <button
               className="theme-toggle"

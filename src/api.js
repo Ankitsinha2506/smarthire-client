@@ -1,5 +1,6 @@
+import {beginWorkspaceRequest} from './hooks/useWorkspaceRefresh';
 const BASE=import.meta.env.VITE_API_URL||'http://localhost:5050/api';
-export async function api(path,options={}){const token=localStorage.getItem('token');const isForm=options.body instanceof FormData;const res=await fetch(BASE+path,{...options,headers:{...(isForm?{}:{'Content-Type':'application/json'}),...(token?{Authorization:`Bearer ${token}`}:{ }),...options.headers}});if(!res.ok){const e=await res.json().catch(()=>({message:'Request failed'}));throw new Error(e.message)}if(res.status===204)return null;return res.json()}
+export async function api(path,options={}){const finish=beginWorkspaceRequest();try{const token=localStorage.getItem('token');const isForm=options.body instanceof FormData;const res=await fetch(BASE+path,{...options,headers:{...(isForm?{}:{'Content-Type':'application/json'}),...(token?{Authorization:`Bearer ${token}`}:{ }),...options.headers}});if(!res.ok){const e=await res.json().catch(()=>({message:'Request failed'}));throw new Error(e.message)}if(res.status===204)return null;return await res.json()}finally{finish()}}
 export async function download(path,fallback='interviews.xlsx'){
   const res=await fetch(BASE+path,{headers:{Authorization:`Bearer ${localStorage.getItem('token')}`}});
   if(!res.ok){

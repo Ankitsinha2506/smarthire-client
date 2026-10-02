@@ -106,3 +106,6 @@ h1,h2,h3,.brand{letter-spacing:-.035em}button,a,input,select,textarea{transition
 :root[data-theme="dark"] .permission-grid label{background:rgba(28,32,56,.65)}
 :root[data-theme="dark"] .permission-grid label.selected{background:linear-gradient(135deg,rgba(125,92,233,.20),rgba(52,174,214,.08))}
 :root[data-theme="dark"] .sheet-scope,:root[data-theme="dark"] .pm-form-grid input{background:var(--glass-soft);border-color:var(--surface-border);color:var(--ink)}
+
+.workspace-refresh:disabled{opacity:.65;cursor:wait}.workspace-refresh:disabled:hover{transform:none}
+@media(prefers-reduced-motion:reduce){.workspace-refresh .spinning{animation:none}}

@@ -1,3 +1,4 @@
+import {useRefreshEffect} from '../hooks/useWorkspaceRefresh';
 import Pagination from '../components/Pagination';
 import React,{useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
@@ -30,7 +31,7 @@ export default function Interviews(){
       .catch(e=>{if(!controller.signal.aborted)setError(e.message)})
       .finally(()=>{if(!controller.signal.aborted)setLoading(false)});
   }
-  useEffect(()=>{requestRef.current?.abort();setLoading(true);const timer=setTimeout(load,filters.search?250:0);return()=>{clearTimeout(timer);requestRef.current?.abort()}},[JSON.stringify(filters)]);
+  useRefreshEffect(()=>{requestRef.current?.abort();setLoading(true);const timer=setTimeout(load,filters.search?250:0);return()=>{clearTimeout(timer);requestRef.current?.abort()}},[JSON.stringify(filters)]);
   async function remove(id){if(String(id).startsWith('sheet-'))return setError('Delete Google Form responses in the linked Google Sheet.');if(!confirm('Delete this interview permanently?'))return;await api('/interviews/'+id,{method:'DELETE'});load()}
   async function importSheet(event){const file=event.target.files[0];if(!file)return;setImporting(true);setError('');setNotice('');try{const form=new FormData();form.append('file',file);const result=await api('/interviews/import',{method:'POST',body:form});setNotice(`${result.imported} records imported${result.failed?`; ${result.failed} rows failed validation`:''}.`);load()}catch(e){setError(e.message)}finally{setImporting(false);event.target.value=''}}
   async function setPlaced(item,placed){try{await api(`/interviews/${item._id}/placement`,{method:'PATCH',body:JSON.stringify({placed})});setSelected(null);load()}catch(e){setError(e.message)}}

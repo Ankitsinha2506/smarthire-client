@@ -1,3 +1,4 @@
+import {useRefreshEffect} from '../hooks/useWorkspaceRefresh';
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../api";
@@ -88,8 +89,8 @@ export default function Users() {
         setCandidates(c);
       },
     );
-  useEffect(() => {
-    load();
+  useRefreshEffect(() => {
+    load().catch(e => setError(e.message));
   }, []);
   const visible = useMemo(
     () =>

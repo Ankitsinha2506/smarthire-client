@@ -1,3 +1,4 @@
+import {useRefreshEffect} from './useWorkspaceRefresh';
 import {useCallback, useEffect, useState} from 'react';
 import {api} from '../api';
 export default function usePagedData(path, search = '') {
@@ -5,7 +6,7 @@ export default function usePagedData(path, search = '') {
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState({items: [], rows: [], headers: [], total: 0, page: 1, pages: 1});
   const [loading, setLoading] = useState(true), [error, setError] = useState('');
-  useEffect(() => {
+  useRefreshEffect(() => {
     const controller = new AbortController();
     setLoading(true); setError('');
     const timer = setTimeout(() => {

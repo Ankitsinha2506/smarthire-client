@@ -1,3 +1,4 @@
+import {useRefreshEffect} from '../hooks/useWorkspaceRefresh';
 import React, { useEffect, useState } from "react";
 import {
   CalendarDays,
@@ -42,7 +43,7 @@ function StandardDashboard() {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-  useEffect(() => {
+  useRefreshEffect(() => {
     const params = new URLSearchParams(
         Object.entries(getDateRange(period)).filter(([, value]) => value),
       ),

@@ -1,3 +1,4 @@
+import {useRefreshEffect} from '../hooks/useWorkspaceRefresh';
 import React,{useEffect,useMemo,useState} from 'react';
 import {UsersRound,CalendarCheck2,BriefcaseBusiness,TrendingUp,UserCog,Target,CalendarRange,UserX,Building2,Code2,Activity,AlertTriangle,ArrowUpRight,Clock3} from 'lucide-react';
 import {api} from '../api';
@@ -14,7 +15,7 @@ export default function AdminAnalytics(){
   const {user}=useAuth(),[now,setNow]=useState(()=>new Date()),greeting=dashboardGreeting(user,now);
   const [period,setPeriod]=useState('all'),[data,setData]=useState(null),[tomorrow,setTomorrow]=useState([]),[loading,setLoading]=useState(true),[error,setError]=useState('');
   useEffect(()=>{const timer=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(timer)},[]);
-  useEffect(()=>{const params=new URLSearchParams(Object.entries(getDateRange(period)).filter(([,v])=>v)),tomorrowParams=new URLSearchParams(getDateRange('tomorrow'));setLoading(true);Promise.all([api('/admin/analytics?'+params),api('/google-sheet/normalized?'+params),api('/interviews?limit=100&'+tomorrowParams),api('/google-sheet/normalized?'+tomorrowParams)]).then(([database,sheet,tomorrowDatabase,tomorrowSheet])=>{setData(mergeSheetAnalytics(database,sheet.items));setTomorrow([...tomorrowDatabase.items,...tomorrowSheet.items].sort((a,b)=>String(a.interviewTime).localeCompare(String(b.interviewTime))))}).catch(e=>setError(e.message)).finally(()=>setLoading(false))},[period]);
+  useRefreshEffect(()=>{const params=new URLSearchParams(Object.entries(getDateRange(period)).filter(([,v])=>v)),tomorrowParams=new URLSearchParams(getDateRange('tomorrow'));setLoading(true);Promise.all([api('/admin/analytics?'+params),api('/google-sheet/normalized?'+params),api('/interviews?limit=100&'+tomorrowParams),api('/google-sheet/normalized?'+tomorrowParams)]).then(([database,sheet,tomorrowDatabase,tomorrowSheet])=>{setData(mergeSheetAnalytics(database,sheet.items));setTomorrow([...tomorrowDatabase.items,...tomorrowSheet.items].sort((a,b)=>String(a.interviewTime).localeCompare(String(b.interviewTime))))}).catch(e=>setError(e.message)).finally(()=>setLoading(false))},[period]);
   if(error)return <div className="alert">{error}</div>;
   const k=data?.kpis||{},periodLabel=rangeOptions.find(([key])=>key===period)?.[1]||'Selected period';
   const cards=[['Total interviews',k.total,BriefcaseBusiness,'violet'],["Today's interviews",k.today,CalendarCheck2,'cyan'],['Upcoming',k.upcoming,CalendarRange,'blue'],['Unassigned',k.unassigned,UserX,'pink'],['Candidates',k.registered,UsersRound,'blue'],['Active staff',k.activeStaff,UserCog,'amber'],['Selected / placed',k.selected,Target,'green'],['Selection rate',`${k.conversion||0}%`,TrendingUp,'pink']];

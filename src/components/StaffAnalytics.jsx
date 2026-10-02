@@ -1,3 +1,4 @@
+import {useRefreshEffect} from '../hooks/useWorkspaceRefresh';
 import React,{useEffect,useMemo,useState} from 'react';
 import {ClipboardList,CalendarCheck2,Trophy,UsersRound,Sparkles,ArrowUpRight,Clock3} from 'lucide-react';
 import {api} from '../api';
@@ -14,7 +15,7 @@ export default function StaffAnalytics({user}){
   const [now,setNow]=useState(()=>new Date()),greeting=dashboardGreeting(user,now);
   const [period,setPeriod]=useState('all'),[stats,setStats]=useState(null),[work,setWork]=useState({total:0,interviews:[]}),[todayWork,setTodayWork]=useState([]),[todaySchedule,setTodaySchedule]=useState([]),[tomorrowSchedule,setTomorrowSchedule]=useState([]),[loading,setLoading]=useState(false);
   useEffect(()=>{const timer=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(timer)},[]);
-  useEffect(()=>{
+  useRefreshEffect(()=>{
     const params=new URLSearchParams(Object.entries(getDateRange(period)).filter(([,value])=>value)),todayParams=new URLSearchParams(getDateRange('today')),tomorrowParams=new URLSearchParams({...getDateRange('tomorrow'),upcoming:'tomorrow'}),sheetEnabled=user.permissions?.googleSheet!==false;
     if(period==='tomorrow')params.set('upcoming','tomorrow');
     setLoading(true);

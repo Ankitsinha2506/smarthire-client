@@ -1,3 +1,4 @@
+import {useRefreshEffect} from '../hooks/useWorkspaceRefresh';
 import React, {useEffect, useRef, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {Bell, Clock3, CheckCircle2, XCircle, CalendarPlus} from 'lucide-react';
@@ -11,7 +12,7 @@ export default function BookingNotifications({role, userId}) {
   const [interviews, setInterviews] = useState({count: 0, items: []}), [interviewError, setInterviewError] = useState(''), [reading, setReading] = useState(false);
   const root = useRef(null);
   const count = data.count + interviews.count;
-  useEffect(() => {
+  useRefreshEffect(() => {
     let controller;
     const load = () => {
       if (document.hidden) return;
