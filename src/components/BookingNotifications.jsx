@@ -11,6 +11,13 @@ export default function BookingNotifications({role, userId}) {
   const [data, setData] = useState({count: 0, items: []}), [open, setOpen] = useState(false), [error, setError] = useState('');
   const [interviews, setInterviews] = useState({count: 0, items: []}), [interviewError, setInterviewError] = useState(''), [reading, setReading] = useState(false);
   const root = useRef(null);
+  const seenSupport = useRef(new Set());
+  const [supportPopup, setSupportPopup] = useState(null);
+  useEffect(() => {
+    const incoming = interviews.items.filter(item => item.source === 'support' && !seenSupport.current.has(item._id));
+    incoming.forEach(item => seenSupport.current.add(item._id));
+    if(incoming.length) setSupportPopup(incoming[0]);
+  }, [interviews]);
   const count = data.count + interviews.count;
   useRefreshEffect(() => {
     let controller;
@@ -37,7 +44,7 @@ export default function BookingNotifications({role, userId}) {
   async function markRead(items) {
     setReading(true);
     try {
-      for (const source of ['database', 'google-sheet']) {
+      for (const source of ['database', 'google-sheet', 'support']) {
         const ids = items.filter(item => item.source === source).map(item => item._id);
         if (ids.length) await api('/interview-notifications/read', {method: 'PATCH', body: JSON.stringify({source, ids})});
       }
@@ -46,14 +53,16 @@ export default function BookingNotifications({role, userId}) {
     finally {setReading(false); refreshBookingNotifications()}
   }
   return <div className="booking-notifications" ref={root}>
+    <>{supportPopup && <div className="support-popup" role="alert"><strong>{supportPopup.kind === 'reminder' ? 'Interview reminder' : 'Support assigned'}: {supportPopup.candidateName}</strong><p>Please be available 10 minutes before {formatInterviewTime(supportPopup.interviewTime)} IST.</p><p>Contact: {supportPopup.candidateMobile || 'Not provided'}</p><button className="secondary" onClick={() => {setOpen(true); setSupportPopup(null)}}>View details</button><button className="secondary" onClick={() => setSupportPopup(null)}>Dismiss</button></div>}</>
     <button className="theme-toggle booking-bell" aria-label={`Notifications: ${count} pending or unread`} aria-expanded={open} onClick={() => setOpen(value => !value)}><Bell size={19}/>{count > 0 && <b>{count > 99 ? '99+' : count}</b>}</button>
     {open && <div className="booking-notification-panel"><header><strong>Notifications</strong><span aria-live="polite">{count} pending / unread</span></header>
-      <div className="notification-section-heading"><strong>New interviews · {interviews.count}</strong>{interviews.items.length > 0 && <button disabled={reading} onClick={() => markRead(interviews.items)}>{reading ? 'Saving…' : 'Mark displayed as read'}</button>}</div>
+      <div className="notification-section-heading"><strong>Interviews & support · {interviews.count}</strong>{interviews.items.length > 0 && <button disabled={reading} onClick={() => markRead(interviews.items)}>{reading ? 'Saving…' : 'Mark displayed as read'}</button>}</div>
       {interviewError && <p role="alert">{interviewError}</p>}
       <div className="interview-notification-list">
         {interviews.items.length ? interviews.items.map(item => <div className="interview-notification-item" key={`${item.source}-${item._id}`}>
-          <CalendarPlus size={19}/><div><strong>{item.candidateName}</strong>
+          <CalendarPlus size={19}/><div><strong>{item.source === 'support' ? `${item.kind === 'reminder' ? 'Reminder: support' : 'Assigned to support'} ` : ''}{item.candidateName}</strong>
           <small>{item.interviewDate ? new Date(item.interviewDate).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) : 'Date not provided'} · {formatInterviewTime(item.interviewTime)}</small>
+          {item.source === 'support' && <><small>Be available 10 minutes early · IST</small><small>Contact: {item.candidateMobile || 'Not provided'}</small></>}
           <small className="notification-technology">{item.technology || 'Technology not provided'}</small>
           <small>{item.companyName}{item.source === 'google-sheet' ? ' · Google Form' : ''}</small></div>
           <button disabled={reading} title="Mark as read" aria-label={`Mark notification for ${item.candidateName} as read`} onClick={() => markRead([item])}><CheckCircle2 size={17}/></button>

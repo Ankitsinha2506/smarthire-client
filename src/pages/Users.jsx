@@ -1,9 +1,11 @@
+import './delete-staff-dialog.css';
 import {useRefreshEffect} from '../hooks/useWorkspaceRefresh';
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { api } from "../api";
 import {
   UserPlus,
+  Trash2,
   X,
   Search,
   UsersRound,
@@ -73,7 +75,12 @@ export default function Users() {
     [candidates, setCandidates] = useState([]),
     [query, setQuery] = useState(""),
     [show, setShow] = useState(false),
-    [editingStaff, setEditingStaff] = useState(null);
+    [editingStaff, setEditingStaff] = useState(null),
+    [deletingStaff, setDeletingStaff] = useState(null),
+    [deleting, setDeleting] = useState(false),
+    [deleteError, setDeleteError] = useState(""),
+    [notice, setNotice] = useState(""),
+    [creating, setCreating] = useState(false);
   const [data, setData] = useState({
       name: "",
       email: "",
@@ -82,6 +89,12 @@ export default function Users() {
       permissions: { ...defaultPermissions, googleSheetScope: "today" },
     }),
     [error, setError] = useState("");
+  useEffect(() => {
+    if (!notice) return;
+    const timer = window.setTimeout(() => setNotice(""), 3000);
+    return () => window.clearTimeout(timer);
+  }, [notice]);
+
   const load = () =>
     Promise.all([api("/admin/users?internal=true"), api("/admin/candidate-summary")]).then(
       ([u, c]) => {
@@ -113,13 +126,17 @@ export default function Users() {
 
   async function create(event) {
     event.preventDefault();
+    if (creating) return;
     setError("");
     if (!/^[A-Za-z\s]+$/.test(data.name.trim()))
       return setError("Please enter a valid name (letters and spaces only).");
     if (!/^\d{10}$/.test(data.phone))
       return setError("Please enter a valid 10-digit phone number.");
     try {
-      await api("/admin/staff", { method: "POST", body: JSON.stringify(data) });
+      setCreating(true);
+      const result = await api("/admin/staff", { method: "POST", body: JSON.stringify(data) });
+      if(result.welcomeEmailSent) setNotice(result.message);
+      else setError(result.message);
       setShow(false);
       setData({
         name: "",
@@ -128,10 +145,10 @@ export default function Users() {
         phone: "",
         permissions: { ...defaultPermissions, googleSheetScope: "today" },
       });
-      load();
+      load().catch(error => setError(error.message));
     } catch (e) {
       setError(e.message);
-    }
+    } finally {setCreating(false)}
   }
   async function active(id, value) {
     await api("/admin/users/" + id, {
@@ -139,6 +156,19 @@ export default function Users() {
       body: JSON.stringify({ active: value }),
     });
     load();
+  }
+  async function confirmDelete(event) {
+    event.preventDefault();
+    if(deleting) return;
+    setDeleting(true); setDeleteError("");
+    try {
+      await api(`/admin/staff/${deletingStaff._id}`, {method:"DELETE"});
+      setUsers(current => current.filter(user => user._id !== deletingStaff._id));
+      setNotice(`${deletingStaff.name}'s staff account was deleted.`);
+      setDeletingStaff(null);
+      setError("");
+    } catch(error) {setDeleteError(error.message)}
+    finally {setDeleting(false)}
   }
   async function savePermissions(event) {
     event.preventDefault();
@@ -155,9 +185,9 @@ export default function Users() {
     }
   }
   useEffect(() => {
-    document.body.style.overflow = show || editingStaff ? "hidden" : "";
+    document.body.style.overflow = show || editingStaff || deletingStaff ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [show, editingStaff]);
+  }, [show, editingStaff, deletingStaff]);
 
   return (
     <>
@@ -170,10 +200,12 @@ export default function Users() {
             attended.
           </p>
         </div>
-        <button className="primary" onClick={() => setShow(true)}>
+        <button className="primary" onClick={() => {setError(""); setShow(true)}}>
           <UserPlus size={18} /> Add staff
         </button>
       </div>
+      {notice && <div className="success-alert" role="status">{notice}</div>}
+      {error && !show && !editingStaff && <div className="alert" role="alert">{error}</div>}
       <div className="statgrid adminstats">
         <Mini
           icon={UsersRound}
@@ -306,6 +338,7 @@ export default function Users() {
                 <th>Password activity</th>
                 <th>Permissions</th>
                 <th>Access</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -383,6 +416,7 @@ export default function Users() {
                           <i />
                         </label>
                       </td>
+                      <td>{u.role === "staff" && <button type="button" className="iconbtn danger" title="Delete staff account" aria-label={`Delete staff ${u.name}`} onClick={() => {setDeleteError(""); setDeletingStaff(u)}}><Trash2 size={17} aria-hidden="true"/></button>}</td>
                     </tr>
                   );
                 })}
@@ -390,6 +424,31 @@ export default function Users() {
           </table>
         </div>
       </section>
+      {deletingStaff && createPortal(
+        <div className="staff-delete-backdrop" onClick={event => {if(event.target === event.currentTarget && !deleting) setDeletingStaff(null)}}>
+          <form className="staff-delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-staff-title" aria-describedby="delete-staff-description" aria-busy={deleting} onSubmit={confirmDelete} onKeyDown={event => {
+            if(event.key === "Escape" && !deleting) {event.preventDefault(); setDeletingStaff(null)}
+            if(event.key === "Tab") {
+              const buttons = [...event.currentTarget.querySelectorAll("button:not(:disabled)")];
+              const first = buttons[0], last = buttons.at(-1);
+              if(event.shiftKey && document.activeElement === first) {event.preventDefault(); last?.focus()}
+              else if(!event.shiftKey && document.activeElement === last) {event.preventDefault(); first?.focus()}
+            }
+          }}>
+            <button type="button" className="staff-delete-close" title="Close" aria-label="Close confirmation" disabled={deleting} onClick={() => setDeletingStaff(null)}><X size={19}/></button>
+            <div className="staff-delete-content">
+              <span className="staff-delete-symbol"><Trash2 size={25} aria-hidden="true"/></span>
+              <span className="staff-delete-eyebrow">STAFF ACCOUNT</span>
+              <h2 id="delete-staff-title">Delete this staff member?</h2>
+              <p id="delete-staff-description" className="staff-delete-intro">This permanently removes their account and workspace access. This action cannot be undone.</p>
+              <div className="staff-delete-person"><span className="staff-delete-avatar">{deletingStaff.name.slice(0,2).toUpperCase()}</span><div><strong>{deletingStaff.name}</strong><span>{deletingStaff.email}</span></div><span className="staff-delete-role">Staff</span></div>
+              <div className="staff-delete-summary"><p><Trash2 size={15} aria-hidden="true"/><span>Support assignments and alerts will be removed. Pending booking requests will be rejected.</span></p><p><ShieldCheck size={16} aria-hidden="true"/><span>Interview records and booking history will be kept.</span></p></div>
+              {deleteError && <div className="alert" role="alert">{deleteError}</div>}
+            </div>
+            <div className="staff-delete-footer"><button type="button" className="staff-delete-cancel" autoFocus disabled={deleting} onClick={() => setDeletingStaff(null)}>Keep staff member</button><button type="submit" className="staff-delete-confirm" disabled={deleting}><Trash2 size={16} aria-hidden="true"/>{deleting ? "Deleting…" : "Delete staff"}</button></div>
+          </form>
+        </div>, document.body
+      )}
       {show && createPortal(
         <div
           className="modalback permission-modalback"
@@ -439,7 +498,7 @@ export default function Users() {
               <PermissionChecks value={data.permissions} set={(permissions) => setData({ ...data, permissions })} />
             </div>
             <div className="pm-footer">
-              <button className="primary wide">Create staff account</button>
+              <button className="primary wide" disabled={creating}>{creating ? "Creating & sending email…" : "Create staff account"}</button>
             </div>
           </form>
         </div>,
