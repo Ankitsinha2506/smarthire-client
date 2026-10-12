@@ -1,6 +1,7 @@
 import {useRefreshEffect} from '../hooks/useWorkspaceRefresh';
 import Pagination from '../components/Pagination';
 import React,{useEffect,useRef,useState} from 'react';
+import {useSearchParams} from 'react-router-dom';
 import {createPortal} from 'react-dom';
 import {Search,Download,Trash2,ChevronLeft,ChevronRight,Eye,X,Upload,FileSpreadsheet,CheckCircle2,Columns3,Pencil,Save} from 'lucide-react';
 import {api,download} from '../api';
@@ -21,6 +22,18 @@ export default function Interviews(){
   const [filters,setFilters]=useState(()=>({search:'',status:'',technology:'',...getDateRange('today'),page:1,limit:10})),[quickRange,setQuickRange]=useState('today'),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState(''),[importing,setImporting]=useState(false);
   useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),4000);return()=>clearTimeout(t)},[notice]);
   const qs=()=>new URLSearchParams(Object.entries(filters).filter(([,value])=>value)).toString();
+  const [searchParams,setSearchParams]=useSearchParams();
+  const entry=searchParams.get('entry');
+  useEffect(()=>{
+    if(!entry)return;
+    const controller=new AbortController();
+    setSelected(null);setEditSelected(false);
+    api('/interviews/'+encodeURIComponent(entry),{signal:controller.signal})
+      .then(item=>{if(!controller.signal.aborted)setSelected(item)})
+      .catch(error=>{if(!controller.signal.aborted)setError(error.message)});
+    return()=>controller.abort();
+  },[entry]);
+  function closeDetails(){setSelected(null);if(entry)setSearchParams(current=>{const next=new URLSearchParams(current);next.delete('entry');return next},{replace:true})}
   const requestRef=useRef(null);
   function load(){
     requestRef.current?.abort();
@@ -47,7 +60,7 @@ export default function Interviews(){
     <div className="filters"><label className="search"><Search/><input placeholder="Search candidate, email, company…" value={filters.search} onChange={e=>setFilters({...filters,search:e.target.value,page:1})}/></label><select value={filters.status} onChange={e=>setFilters({...filters,status:e.target.value,page:1})}><option value="">All statuses</option>{statuses.map(x=><option key={x}>{x}</option>)}</select><select value={filters.technology} onChange={e=>setFilters({...filters,technology:e.target.value,page:1})}><option value="">All technologies</option>{technologies.map(x=><option key={x}>{x}</option>)}</select><label className="datefilter"><span>From</span><input type="date" value={filters.from} onChange={e=>{setQuickRange('custom');setFilters({...filters,from:e.target.value,page:1})}}/></label><label className="datefilter"><span>To</span><input type="date" value={filters.to} onChange={e=>{setQuickRange('custom');setFilters({...filters,to:e.target.value,page:1})}}/></label></div>
     <div className="tablewrap"><table className="interviewtable"><thead><tr><th>Candidate</th><th>Interview</th><th>Technology</th><th>Company</th><th>HR contact</th><th>Support staff</th><th>Round</th><th>Status</th><th>Actions</th></tr></thead><tbody>{loading?<tr><td colSpan="9" className="empty">Loading interviews…</td></tr>:items.length?items.map(item=><tr key={item._id}><td><div className="person"><span>{item.candidateName.slice(0,2).toUpperCase()}</span><div><strong>{item.candidateName}</strong><small>{item.candidateEmail}</small><small>{item.candidateMobile}</small></div></div></td><td><strong>{new Date(item.interviewDate).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</strong><small className="block">{formatInterviewTime(item.interviewTime)}</small></td><td>{item.technology}</td><td><strong>{item.companyName}</strong></td><td><strong>{item.hrName}</strong><a className="contactlink" href={`mailto:${item.hrEmail}`}>{item.hrEmail}</a><a className="contactlink" href={`tel:${item.hrMobile}`}>{item.hrMobile}</a></td><td><div className="assigned-names">{item.assignedStaff?.length?item.assignedStaff.map(person=><span key={person._id}>{person.name}</span>):<em>Unassigned</em>}</div></td><td>{item.rounds?.[0]||'—'}</td><td><span className={`status ${item.status.toLowerCase().replace(' ','-')}`}>{item.status}</span></td><td className="actions"><button title="View all details" className="iconbtn" onClick={()=>{setEditSelected(false);setSelected(item)}}><Eye size={17}/></button>{user.role==='user'&&item.status==='Selected'&&<button className="placedbtn" onClick={()=>setPlaced(item,true)}>Mark placed</button>}{user.role==='admin'&&<button title="Edit record" className="iconbtn" onClick={()=>{setEditSelected(true);setSelected(item)}}><Pencil size={17}/></button>}{user.role==='admin'&&item.source!=='google-sheet'&&<button title="Delete" className="iconbtn danger" onClick={()=>remove(item._id)}><Trash2 size={16}/></button>}</td></tr>):<tr><td colSpan="9" className="empty">No interviews match these filters.</td></tr>}</tbody></table></div>
     <Pagination page={meta.page} pages={meta.pages} total={meta.total} limit={filters.limit} loading={loading} setPage={page=>setFilters(current=>({...current,page}))} setLimit={limit=>setFilters(current=>({...current,limit,page:1}))}/>
-    {selected&&<Details item={selected} initialEditing={editSelected} user={user} close={()=>setSelected(null)} refreshed={load} saved={()=>{setSelected(null);setNotice('Interview details updated successfully.');load()}}/>} 
+    {selected&&<Details item={selected} initialEditing={editSelected} user={user} close={closeDetails} refreshed={load} saved={()=>{closeDetails();setNotice('Interview details updated successfully.');load()}}/>} 
     {showExport&&<ExportDialog filters={qs()} close={()=>setShowExport(false)}/>} 
   </section>
 }

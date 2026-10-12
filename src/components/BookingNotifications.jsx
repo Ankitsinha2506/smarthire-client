@@ -1,4 +1,4 @@
-import {useRefreshEffect} from '../hooks/useWorkspaceRefresh';
+import {refreshWorkspace, useRefreshEffect} from '../hooks/useWorkspaceRefresh';
 import React, {useEffect, useRef, useState} from 'react';
 import {Link} from 'react-router-dom';
 import {Bell, Clock3, CheckCircle2, XCircle, CalendarPlus} from 'lucide-react';
@@ -11,6 +11,13 @@ export default function BookingNotifications({role, userId}) {
   const [data, setData] = useState({count: 0, items: []}), [open, setOpen] = useState(false), [error, setError] = useState('');
   const [interviews, setInterviews] = useState({count: 0, items: []}), [interviewError, setInterviewError] = useState(''), [reading, setReading] = useState(false);
   const root = useRef(null);
+  const snapshots = useRef({});
+  function syncWorkspace(source, result) {
+    const signature = JSON.stringify([result.count, result.items]);
+    const previous = snapshots.current[source];
+    snapshots.current[source] = signature;
+    if (previous !== undefined && previous !== signature) refreshWorkspace();
+  }
   const seenSupport = useRef(new Set());
   const [supportPopup, setSupportPopup] = useState(null);
   useEffect(() => {
@@ -25,8 +32,8 @@ export default function BookingNotifications({role, userId}) {
       if (document.hidden) return;
       controller?.abort(); controller = new AbortController();
       const signal = controller.signal;
-      api('/interview-notifications', {signal}).then(result => {if (!signal.aborted) {setInterviews(result); setInterviewError(result.warning || '')}}).catch(error => {if (!signal.aborted && error.name !== 'AbortError') setInterviewError('New interview notifications could not be refreshed.')});
-      api('/booking-requests/notifications', {signal}).then(result => {if (!signal.aborted) {setData(result); setError('')}}).catch(error => {if (!signal.aborted && error.name !== 'AbortError') setError('Notifications could not be refreshed.')});
+      api('/interview-notifications', {signal}).then(result => {if (!signal.aborted) {syncWorkspace('interviews', result); setInterviews(result); setInterviewError(result.warning || '')}}).catch(error => {if (!signal.aborted && error.name !== 'AbortError') setInterviewError('New interview notifications could not be refreshed.')});
+      api('/booking-requests/notifications', {signal}).then(result => {if (!signal.aborted) {syncWorkspace('bookings', result); setData(result); setError('')}}).catch(error => {if (!signal.aborted && error.name !== 'AbortError') setError('Notifications could not be refreshed.')});
     };
     load();
     const interval = setInterval(load, 10000);
@@ -60,7 +67,7 @@ export default function BookingNotifications({role, userId}) {
       {interviewError && <p role="alert">{interviewError}</p>}
       <div className="interview-notification-list">
         {interviews.items.length ? interviews.items.map(item => <div className="interview-notification-item" key={`${item.source}-${item._id}`}>
-          <CalendarPlus size={19}/><div><strong>{item.source === 'support' ? `${item.kind === 'reminder' ? 'Reminder: support' : 'Assigned to support'} ` : ''}{item.candidateName}</strong>
+          <CalendarPlus size={19}/><div>{item.source !== 'support' && <Link to={`/interviews?entry=${encodeURIComponent(item._id)}`} onClick={() => setOpen(false)}>View interview details</Link>}<strong>{item.source === 'support' ? `${item.kind === 'reminder' ? 'Reminder: support' : 'Assigned to support'} ` : ''}{item.candidateName}</strong>
           <small>{item.interviewDate ? new Date(item.interviewDate).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) : 'Date not provided'} · {formatInterviewTime(item.interviewTime)}</small>
           {item.source === 'support' && <><small>Be available 10 minutes early · IST</small><small>Contact: {item.candidateMobile || 'Not provided'}</small></>}
           <small className="notification-technology">{item.technology || 'Technology not provided'}</small>
@@ -70,7 +77,7 @@ export default function BookingNotifications({role, userId}) {
       </div>
       <div className="notification-section-heading"><strong>Booking requests</strong><span>{data.count} {role === 'admin' ? 'pending' : 'unread'}</span></div>
       {error && <p role="alert">{error}</p>}
-      {data.items.length ? data.items.map(item => <Link key={item._id} to="/booking-requests" onClick={() => {setOpen(false); refreshBookingNotifications()}}>
+      {data.items.length ? data.items.map(item => <Link key={item._id} to={`/booking-requests?entry=${encodeURIComponent(item._id)}`} onClick={() => {setOpen(false); refreshBookingNotifications()}}>
         {item.status === 'Pending' ? <Clock3 size={19}/> : item.status === 'Approved' ? <CheckCircle2 size={19}/> : <XCircle size={19}/>}
         <span><strong>{role === 'admin' ? `${item.staff?.name || 'Staff'} requested an interview slot` : `Your interview slot is ${item.status.toLowerCase()} by admin`}</strong><small>{item.details.candidateName} · {new Date(item.details.interviewDate).toLocaleDateString('en-IN')} · {formatInterviewTime(item.details.interviewTime)}</small><small>{item.details.technology}</small></span>
       </Link>) : <p>No {role === 'admin' ? 'pending requests' : 'unread notifications'}.</p>}
