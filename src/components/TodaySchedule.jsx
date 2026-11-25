@@ -12,7 +12,23 @@ function Phone({ value, name }) {
 
 export default function TodaySchedule({ items = [] }) {
   if (!items.length) return <div className="bi-empty">No interviews scheduled today</div>;
-  return <div className="today-schedule-list">{sortInterviewsByTime(items).map(item => (
+  const schedule = sortInterviewsByTime(items);
+  return <div className="today-schedule-list">
+    <div className="schedule-mobile">
+      <table aria-label="Today's interview schedule">
+        <thead><tr>{['Time', 'Candidate', 'Round', 'Mobile'].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead>
+        <tbody>{schedule.map(item => {
+          const round = item.rounds?.[0] || '—';
+          return <tr key={item._id}>
+            <td><time>{formatInterviewTime(item.interviewTime).replace(/:00 (AM|PM)$/, ' $1')}</time></td>
+            <td className="schedule-name">{item.candidateName || '—'}</td>
+            <td><span className="schedule-round" aria-label={round}>{String(round).replace(/^Round\s+(\d+)$/i, '$1').replace(/^(Final|Manager) Round$/i, '$1')}</span></td>
+            <td><Phone value={item.candidateMobile} name={item.candidateName || 'candidate'}/></td>
+          </tr>;
+        })}</tbody>
+      </table>
+    </div>
+    {schedule.map(item => (
     <article key={item._id}>
       <time>{formatInterviewTime(item.interviewTime)}</time>
       <div className="schedule-candidate">

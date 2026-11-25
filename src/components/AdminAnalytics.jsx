@@ -30,7 +30,7 @@ export default function AdminAnalytics(){
       <ChartCard title="Technology-wise interviews" subtitle="Count and percentage of total interviews"><TechnologyMix data={data?.technology||[]} total={k.total||0}/></ChartCard>
       <ChartCard title="Top companies" subtitle="Companies by interview volume"><CompanyBars data={data?.company||[]}/></ChartCard>
       <ChartCard title={`Staff support · ${periodLabel}`} subtitle="Assigned interviews per staff member"><StaffBars data={data?.staffWorkload||[]} periodLabel={periodLabel}/></ChartCard>
-      <ChartCard id="today-schedule" title={`Today's schedule (${data?.today?.length||0})`} subtitle="Candidate, domain and support staff" wide><TodaySchedule items={data?.today||[]}/></ChartCard>
+      <ChartCard id="today-schedule" title={`Today's schedule (${data?.today?.length||0})`} subtitle="Earliest interview first" wide><TodaySchedule items={data?.today||[]}/></ChartCard>
     </section>
   </div>
 }
