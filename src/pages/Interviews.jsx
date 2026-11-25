@@ -19,7 +19,7 @@ const nameOnly=value=>value.replace(/[^A-Za-z\s]/g,'');
 
 export default function Interviews(){
   const {user}=useAuth(),fileRef=useRef(),[items,setItems]=useState([]),[selected,setSelected]=useState(null),[editSelected,setEditSelected]=useState(false),[showExport,setShowExport]=useState(false),[meta,setMeta]=useState({page:1,pages:1,total:0});
-  const [filters,setFilters]=useState(()=>({search:'',status:'',technology:'',...getDateRange('today'),page:1,limit:10})),[quickRange,setQuickRange]=useState('today'),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState(''),[importing,setImporting]=useState(false);
+  const [filters,setFilters]=useState(()=>({search:'',status:'',technology:'',...getDateRange('today'),page:1,limit:50})),[quickRange,setQuickRange]=useState('today'),[loading,setLoading]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState(''),[importing,setImporting]=useState(false);
   useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),4000);return()=>clearTimeout(t)},[notice]);
   const qs=()=>new URLSearchParams(Object.entries(filters).filter(([,value])=>value)).toString();
   const [searchParams,setSearchParams]=useSearchParams();
